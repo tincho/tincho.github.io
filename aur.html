@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Áureo</title>
+        <style>
+        #root {
+            border: 1px solid rgb(34, 47, 96);
+        }
+        #wrapper {
+            width: 100%;
+            position: relative;
+        }
+        canvas {
+            transition: all 0.3s ease;
+        }
+        #captures img {
+            float: left;
+            margin-right: 20px;
+            max-width: 400px;
+        }
+        </style>
+    </head>
+    <body>
+        <div id="wrapper">
+            <canvas width="1280" height="920" id="root">
+                You do not have a canvas enabled browser
+            </canvas>
+            <button type="button" class="capture">Capture</button>
+            <button type="button" class="clear">Reset</button>
+        </div>
+
+        <hr>
+        <div id="captures">
+        </div>
+    </body>
+
+<script type="text/javascript">
+    const randomMax = max => Math.floor(Math.random()*max);
+    const randomArrayItem = items => items[randomMax(items.length)];
+    const mkHexColor = n => '#'+Math.floor(n).toString(16);
+    const degToRadians = deg => deg*(Math.PI/180);
+    const add1 = n => n + 1;
+    const sub1 = n => n - 1;
+    const goldenInc = n => n + 1.6180339887;
+    const addGoldenAngle = n => n + 137.5;
+    const subGoldenAngle = n => n - 137.5;
+
+    const clearCanvas = (canvas) => {
+        let c = canvas.getContext('2d');
+        c.restore();
+        c.clearRect(0,0, canvas.width, canvas.height);
+    }
+    const canvasElement = document.getElementById('root');
+    const context = canvasElement.getContext('2d');
+
+    var
+        // dimensions
+        w = 80,
+        h = 80,
+        // position
+        x = (w/2)*-1,
+        y = (h/2)*-1;
+
+
+    const pallete = [
+        //'#cacaca',
+        '#107fc9',
+        '#78a890',
+        '#72cfca',
+        '#1693a5',
+        '#3791a4',
+        'rgba(0,20,73,0.4)',
+        'rgba(34,128,107,0.5)',
+        'rgba(126,206,202,1)',
+        //'#5cceee',
+        'rgba(242, 249, 255, 0.9)',
+        'rgba(214, 235, 255, 0.7)',
+        'rgba(190, 224, 255, 0.78)',
+        'rgba(159, 207, 251, 0.62)',
+        //'rgba(255, 255, 255, 0.87)',
+        //'rgba(217, 191, 55, 0.88)',
+        /*'#2a606f',
+        '#3addbd',
+        '#f4462b',
+        '#b70bfe'*/
+    ];
+    let currentPallete = pallete;
+
+    let angle = 0;
+    let palleteI = 0;
+    let oscillate = add1;
+    let count = 0;
+    let delay = 14;
+    let oUpperBound = 420;
+    let oLowerBound = 42;
+    let getAngle = addGoldenAngle;
+    function drawRectangle() {
+
+        context.save();
+
+        context.lineWidth = 4;
+
+        // position center
+        context.translate(canvasElement.width / 2 - w, canvasElement.height / 2 - h);
+
+        getAngle = [
+            addGoldenAngle,
+            subGoldenAngle
+        ][0];
+        angle = getAngle(angle);
+        context.rotate(degToRadians(angle));
+
+        x = oscillate(x);
+        y = oscillate(y);
+
+        //x = oscillate(x);
+        //y = oscillate(y);
+
+        canvasElement.style.opacity = [
+            0.8,
+            1
+        ][count % 3 == 0];
+
+        context.fillStyle = randomArrayItem(currentPallete);
+        context.strokeStyle = randomArrayItem(currentPallete);
+
+
+        // context.beginPath();
+        // context.arc(x, y, 10, 10, 2 * Math.PI, false);
+        // context.stroke();
+        // context.closePath();
+
+
+/*            var img = new Image();
+            img.onload = function() {
+                context.drawImage(img, x, y, 10, 10);
+            };
+            img.src="./amap.jpg";*/
+
+        context.fillRect(x,y,w,h);
+        context.strokeRect(x,y,w,h);
+        context.restore();
+
+
+
+        if(x >= oUpperBound) {
+            oscillate = sub1;
+            //clearCanvas(canvasElement);
+        }
+        if(x <= oLowerBound) {
+            oscillate = add1;
+            //clearCanvas(canvasElement);
+        }
+
+
+        count++;
+        if (count > 50 && count < 200) {
+            delay++;
+        }
+    }
+
+    var interval = setInterval(drawRectangle, delay);
+
+    document.querySelector(".clear").onclick = clearCanvas.bind(null, canvasElement);
+
+    document.querySelector(".capture").onclick = function() {
+        var canvas  = document.querySelector('canvas'),
+            dataUrl = canvas.toDataURL(),
+            img     = document.createElement('img');
+        img.src = dataUrl;
+        // After you are done styling it, append it to the BODY element
+        document.querySelector("#captures").appendChild(img);
+    };
+
+</script>
+
+
+</html>
